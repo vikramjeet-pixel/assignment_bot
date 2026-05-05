@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyStripeObject = Record<string, any>;
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
         const uid = obj.metadata?.uid as string | undefined;
         const planId = obj.metadata?.planId as string | undefined;
         if (uid && planId) {
-          await adminDb
+          await getAdminDb()
             .collection("profiles")
             .doc(uid)
             .set(
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
         if (uid) {
           const plan = type === "customer.subscription.deleted" ? "free" : (obj.metadata?.planId ?? "free");
           const status = type === "customer.subscription.deleted" ? "canceled" : obj.status;
-          await adminDb
+          await getAdminDb()
             .collection("profiles")
             .doc(uid)
             .set({ subscription: { status, plan } }, { merge: true });
